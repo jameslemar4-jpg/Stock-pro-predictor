@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, TrendingDown, AlertCircle, BarChart3, DollarSign, Brain, Search,
-  Moon, Sun, Star, StarOff, Plus, X, Download, RefreshCw, Newspaper, PieChart, Calendar
+  Moon, Sun, Star, StarOff, Plus, X, RefreshCw, Newspaper, PieChart
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Home() {
   const [ticker, setTicker] = useState('');
@@ -112,16 +111,6 @@ export default function Home() {
   
   const getScoreColor = (score) => score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-yellow-500' : 'bg-red-500';
   
-  const prepareChartData = () => {
-    if (!analysis?.historicalData) return [];
-    return analysis.historicalData.prices.map((price, i) => ({
-      date: analysis.historicalData.timestamps 
-        ? new Date(analysis.historicalData.timestamps[i] * 1000).toLocaleDateString() 
-        : `Day ${i}`,
-      price: parseFloat(price)
-    }));
-  };
-  
   const bgClass = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900';
   const cardClass = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800';
   const inputClass = darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white/20 border-white/30 text-white placeholder-white/50';
@@ -137,10 +126,10 @@ export default function Home() {
             <p className="text-blue-200 text-sm">Real-Time • Advanced Indicators • Portfolio Tracking</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={toggleDarkMode} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-white/20'} text-white`}>
+            <button onClick={toggleDarkMode} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-white/20'} text-white hover:bg-blue-600 transition`}>
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button onClick={() => setCompareMode(!compareMode)} className={`px-3 py-2 rounded ${compareMode ? 'bg-blue-600' : darkMode ? 'bg-gray-700' : 'bg-white/20'} text-white text-sm`}>
+            <button onClick={() => setCompareMode(!compareMode)} className={`px-3 py-2 rounded ${compareMode ? 'bg-blue-600' : darkMode ? 'bg-gray-700' : 'bg-white/20'} text-white text-sm hover:bg-blue-700 transition`}>
               {compareMode ? 'Exit Compare' : 'Compare'}
             </button>
           </div>
@@ -169,7 +158,7 @@ export default function Home() {
             <button
               onClick={() => analyzeStock()}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded font-semibold text-sm"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded font-semibold text-sm transition"
             >
               {loading ? <RefreshCw className="animate-spin" size={18} /> : 'Analyze'}
             </button>
@@ -222,10 +211,10 @@ export default function Home() {
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 px-4 py-2 text-sm font-semibold ${
+                        className={`flex-1 px-4 py-2 text-sm font-semibold transition ${
                           activeTab === tab 
                             ? (darkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-blue-600')
-                            : (darkMode ? 'text-gray-400' : 'text-gray-600')
+                            : (darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50')
                         }`}
                       >
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -241,10 +230,10 @@ export default function Home() {
                           <div>
                             <div className="flex items-center gap-2">
                               <h2 className="text-2xl font-bold">{analysis.ticker}</h2>
-                              <button onClick={() => watchlist.find(s => s.ticker === analysis.ticker) ? removeFromWatchlist(analysis.ticker) : addToWatchlist(analysis)} className="text-yellow-500">
+                              <button onClick={() => watchlist.find(s => s.ticker === analysis.ticker) ? removeFromWatchlist(analysis.ticker) : addToWatchlist(analysis)} className="text-yellow-500 hover:text-yellow-600 transition">
                                 {watchlist.find(s => s.ticker === analysis.ticker) ? <Star fill="currentColor" size={18} /> : <StarOff size={18} />}
                               </button>
-                              <button onClick={addToPortfolio} className="text-blue-500"><Plus size={18} /></button>
+                              <button onClick={addToPortfolio} className="text-blue-500 hover:text-blue-600 transition"><Plus size={18} /></button>
                             </div>
                             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{analysis.companyName}</p>
                             {analysis.sector && <p className="text-xs opacity-60">{analysis.sector} • {analysis.industry}</p>}
@@ -282,28 +271,12 @@ export default function Home() {
                                 <span className="text-xs font-semibold">{name}</span>
                               </div>
                               <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-3 overflow-hidden`}>
-                                <div className={`h-full ${getScoreColor(score)}`} style={{ width: `${score}%` }} />
+                                <div className={`h-full ${getScoreColor(score)} transition-all duration-500`} style={{ width: `${score}%` }} />
                               </div>
                               <div className="text-right text-xs mt-0.5 opacity-70">{score}/100</div>
                             </div>
                           ))}
                         </div>
-                        
-                        {/* Chart */}
-                        {analysis.historicalData && (
-                          <div className="mb-4">
-                            <h3 className="text-sm font-bold mb-2">90-Day Price History</h3>
-                            <ResponsiveContainer width="100%" height={200}>
-                              <LineChart data={prepareChartData()}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
-                                <XAxis dataKey="date" stroke={darkMode ? '#9ca3af' : '#6b7280'} tick={{ fontSize: 10 }} />
-                                <YAxis stroke={darkMode ? '#9ca3af' : '#6b7280'} tick={{ fontSize: 10 }} />
-                                <Tooltip contentStyle={{ backgroundColor: darkMode ? '#1f2937' : '#fff', border: '1px solid #ccc' }} />
-                                <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-                        )}
                         
                         {/* Price Targets */}
                         <div className="mb-4">
