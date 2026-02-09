@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "stock-predictor-pro",
   "version": "2.0.0",
   "private": true,
